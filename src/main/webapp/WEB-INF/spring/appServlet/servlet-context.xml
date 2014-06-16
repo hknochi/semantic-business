@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving 
+		up static resources in the ${webappRoot}/resources directory -->
+	<mvc:resources mapping="/resources/**" location="/resources/**" />
+
+	<!-- <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean"/> -->
+
+	<!-- <bean class="org.springframework.data.repository.support.DomainClassConverter"> 
+		<constructor-arg ref="conversionService"/> </bean> -->
+
+	<!-- <bean class="com.googlecode.spring.appengine.objectify.DomainClassConverter"> 
+		<constructor-arg ref="conversionService" /> <constructor-arg ref="ofyService" 
+		/> </bean> -->
+
+	<bean id="messageCodesResolver"
+		class="org.springframework.validation.DefaultMessageCodesResolver"
+		p:messageCodeFormatter="#{T(org.springframework.validation.DefaultMessageCodesResolver$Format).POSTFIX_ERROR_CODE}" />
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
+		p:basename="WEB-INF/i18n/messages"
+		p:cacheSeconds="#{T(com.google.appengine.api.utils.SystemProperty).environment.value() == T(com.google.appengine.api.utils.SystemProperty$Environment$Value).Development ? 0 : -1}"
+		p:fallbackToSystemLocale="false"
+		p:useCodeAsDefaultMessage="#{T(com.google.appengine.api.utils.SystemProperty).environment.value() == T(com.google.appengine.api.utils.SystemProperty$Environment$Value).Development}" />
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:prefix="/WEB-INF/views/" p:suffix=".jsp" />
+	
+	
+	<!-- Imports user-defined @Controller beans that process client requests -->
+	<import resource="controllers.xml" />
+
+</beans>

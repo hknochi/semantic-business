@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+
+	<application>hknochi-website</application>
+	<version>1</version>
+
+	<static-files>
+		<include path="**" expiration="14d" />
+		<exclude path="/META-INF/**" />
+	</static-files>
+	<resource-files>
+		<exclude path="/resources/**" />
+	</resource-files>
+
+	<sessions-enabled>true</sessions-enabled>
+	<threadsafe>true</threadsafe>
+
+
+	<system-properties>
+		<property name="java.util.logging.config.file" value="WEB-INF/logging.properties" />
+	</system-properties>
+
+	<!-- <admin-console> -->
+	<!-- <page name="Admin" url="/admin" /> -->
+	<!-- <page name="Appstats" url="/appstats" /> -->
+	<!-- </admin-console> -->
+
+	<!-- <static-error-handlers> -->
+	<!-- <handler file="/html/error.html" /> -->
+	<!-- <handler file="/html/over_quota.html" error-code="over_quota" /> -->
+	<!-- <handler file="/html/dos_api_denial.html" error-code="dos_api_denial" 
+		/> -->
+	<!-- <handler file="/html/timeout.html" error-code="timeout" /> -->
+	<!-- </static-error-handlers> -->
+
+	<inbound-services>
+		<service>xmpp_message</service>
+		<service>xmpp_presence</service>
+	</inbound-services>
+
+
+</appengine-web-app>
