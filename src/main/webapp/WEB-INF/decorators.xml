@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <decorators defaultdir="/WEB-INF/layouts">
 
-<!--     <excludes> -->
+    <excludes>
 <!--         <pattern>/_ah/**</pattern> -->
-<!--         <pattern>/resources/**</pattern> -->
-<!--         <pattern>/heartbeat</pattern> -->
-<!--         <pattern>/appstats**</pattern> -->
-<!--     </excludes> -->
+        <pattern>/resources/**</pattern>
+        <pattern>/heartbeat</pattern>
+        <pattern>/appstats**</pattern>
+        <pattern>/resource/**</pattern>
+    </excludes> 
 
     <decorator name="master" page="master.jsp">
         <pattern>/*</pattern>

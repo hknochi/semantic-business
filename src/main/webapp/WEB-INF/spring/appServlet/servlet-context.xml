@@ -36,9 +36,11 @@
 	<bean id="viewResolver"
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
 		p:prefix="/WEB-INF/views/" p:suffix=".jsp" />
-	
-	
+
+
 	<!-- Imports user-defined @Controller beans that process client requests -->
 	<import resource="controllers.xml" />
-
+	<import resource="applicationContext-data.xml" />
+	<import resource="applicationContext-service.xml" />
+	<!-- <import resource="appServlet/applicationContext-security.xml" /> -->
 </beans>

@@ -10,9 +10,9 @@
 </gae:isDevelopment>
 <gae:isProduction>
 	<c:set var="bootstrapCss"
-		value="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" />
+		value="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
 	<c:set var="bootstrapJs"
-		value="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js" />
+		value="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js" />
 	<c:set var="jqueryJs"
 		value="http://code.jquery.com/jquery-1.10.2.min.js" />
 </gae:isProduction>
