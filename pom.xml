@@ -2,31 +2,70 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.hknochi.gae</groupId>
-	<artifactId>sSemanticWebProject</artifactId>
+	<artifactId>SemanticWebProject</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>sSemanticWebProject</name>
+	<name>SemanticWebProject</name>
 	<properties>
 		<java-version>1.7</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<objectifyVersion>1.1.1</objectifyVersion>
 		<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 		<gae.version>1.8.5</gae.version>
+
+		<gae.orm.version>2.1.2</gae.orm.version>
+		<datanucleus.core.version>3.1.3</datanucleus.core.version>
+		<datanucleus.api.version>3.1.3</datanucleus.api.version>
+		<datanucleus.enhancer.version>3.1.1</datanucleus.enhancer.version>
+		<datanucleus.plugin.version>3.1.3</datanucleus.plugin.version>
 
 		<org.springframework.data-version>1.7.0.RELEASE</org.springframework.data-version>
 		<org.springframework-version>4.0.2.RELEASE</org.springframework-version>
 		<org.springframework.security-version>3.2.1.RELEASE</org.springframework.security-version>
 		<org.aspectj-version>1.7.4</org.aspectj-version>
 		<org.slf4j-version>1.6.1</org.slf4j-version>
+		<org.apache.jena-version>2.11.2</org.apache.jena-version>
 	</properties>
+
 	<dependencies>
+		<!-- RDF -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
+			<version>${org.apache.jena-version}</version>
+		</dependency>
+
+		<!-- Google -->
+		<dependency>
+			<groupId>com.google.code.geocoder-java</groupId>
+			<artifactId>geocoder-java</artifactId>
+			<version>0.16</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>17.0</version>
+		</dependency>
+
+		<!-- OSM - Nominatim -->
+		<dependency>
+			<groupId>fr.dudie</groupId>
+			<artifactId>nominatim-api</artifactId>
+			<version>3.0-SNAPSHOT</version>
+		</dependency>
+
 		<!-- Crawler -->
 		<dependency>
 			<groupId>edu.uci.ics</groupId>
 			<artifactId>crawler4j</artifactId>
 			<version>3.5</version>
 		</dependency>
+
 		<!-- Google Appengine -->
 		<dependency>
 			<groupId>com.google.appengine</groupId>
@@ -56,22 +95,16 @@
 			<version>0.2</version>
 		</dependency>
 
-		<!-- Objectify -->
-		<dependency>
-			<groupId>com.googlecode.objectify</groupId>
-			<artifactId>objectify</artifactId>
-			<version>4.0rc2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.googlecode.objectify-appengine-spring</groupId>
-			<artifactId>objectify-appengine-spring</artifactId>
-			<version>${objectifyVersion}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
 			<version>${org.springframework.data-version}</version>
 		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>javax.persistence</groupId> -->
+		<!-- <artifactId>persistence-api</artifactId> -->
+		<!-- <version>1.0.2</version> -->
+		<!-- </dependency> -->
 
 		<!-- Spring -->
 		<dependency>
@@ -121,6 +154,17 @@
 			<artifactId>spring-beans</artifactId>
 			<version>${org.springframework-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+
 		<!-- AspectJ -->
 		<dependency>
 			<groupId>org.aspectj</groupId>
@@ -204,6 +248,77 @@
 					<artifactId>servlet-api</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.datanucleus</groupId> -->
+		<!-- <artifactId>datanucleus-jpa</artifactId> -->
+		<!-- <version>2.1.8</version> -->
+		<!-- <scope>runtime</scope> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.google.appengine.orm</groupId> -->
+		<!-- <artifactId>datanucleus-appengine</artifactId> -->
+		<!-- <version>2.1.2</version> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.datanucleus</groupId> -->
+		<!-- <artifactId>datanucleus-core</artifactId> -->
+		<!-- <version>4.0.0-release</version> -->
+		<!-- <exclusions> -->
+		<!-- <exclusion> -->
+		<!-- <groupId>javax.transaction</groupId> -->
+		<!-- <artifactId>transaction-api</artifactId> -->
+		<!-- </exclusion> -->
+		<!-- </exclusions> -->
+		<!-- <scope>runtime</scope> -->
+		<!-- </dependency> -->
+		<dependency>
+			<groupId>com.google.appengine.orm</groupId>
+			<artifactId>datanucleus-appengine</artifactId>
+			<version>${gae.orm.version}</version>
+		</dependency>
+		<!-- Datanucleus -->
+		<!-- datanucleus-core is not needed for compilation. in fact, it cannot 
+			have compile scope because the datanucleus plugin automatically adds it during 
+			enhancement and complains if there are two copies. app should not depend 
+			on any classes in this lib anyways. -->
+		<dependency>
+			<groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-core</artifactId>
+			<version>${datanucleus.core.version}</version>
+			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.transaction</groupId>
+					<artifactId>transaction-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- datanucleus-jpa is needed during compilation for its @Extension annotation -->
+		<!-- which is used throughout entity classes -->
+		<dependency>
+			<groupId>org.datanucleus</groupId>
+			<artifactId>datanucleus-api-jpa</artifactId>
+			<version>${datanucleus.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jpa_2.0_spec</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.jdo</groupId>
+			<artifactId>jdo-api</artifactId>
+			<version>[3.0, 4.0)</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>javax.persistence</artifactId>
+			<version>2.0.0</version>
 		</dependency>
 
 		<!-- Jackson JSON Processor -->
@@ -299,6 +414,26 @@
 			<version>1.3</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+			<version>1.0.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-rest</artifactId>
+			<version>1.0.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>1.0.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>1.0.0.RELEASE</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<!-- For testing against latest Spring snapshots -->
@@ -338,6 +473,12 @@
 		<repository>
 			<id>google-api-services</id>
 			<url>http://google-api-client-libraries.appspot.com/mavenrepo</url>
+		</repository>
+		<repository>
+			<id>com.hknochi.repo</id>
+			<name>com.hknochi.repo on GitHub</name>
+			<url>https://raw.github.com/hknochi/com.hknochi.repo/master</url>
+			<layout>default</layout>
 		</repository>
 	</repositories>
 	<pluginRepositories>
@@ -442,11 +583,11 @@
 				<groupId>net.kindleit</groupId>
 				<artifactId>maven-gae-plugin</artifactId>
 				<version>0.9.6</version>
-				<!-- <configuration> -->
-				<!-- <serverId>appengine.google.com</serverId> -->
-				<!-- <sdkDir>${gae.home}</sdkDir> -->
-				<!-- <appDir>${basedir}/${project.artifactId}/</appDir> -->
-				<!-- </configuration> -->
+				<configuration>
+					<!-- <serverId>appengine.google.com</serverId> -->
+					<sdkDir>${gae.home}</sdkDir>
+					<!-- <appDir>${basedir}/${project.artifactId}/</appDir> -->
+				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>net.kindleit</groupId>
@@ -455,6 +596,25 @@
 						<type>pom</type>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.datanucleus</groupId>
+				<artifactId>maven-datanucleus-plugin</artifactId>
+				<version>3.1.2</version>
+				<configuration>
+					<api>JPA</api>
+					<fork>false</fork>
+					<persistenceUnitName>transactions-optional</persistenceUnitName>
+					<verbose>true</verbose>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
