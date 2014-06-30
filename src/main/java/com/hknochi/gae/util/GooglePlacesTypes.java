@@ -1,0 +1,112 @@
+package com.hknochi.gae.util;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class GooglePlacesTypes {
+
+	private static List<String> list = null;
+
+	public static List<String> list() {
+		if (list == null) {
+			list = new ArrayList<String>();
+			list.add("accounting");
+			list.add("airport");
+			list.add("amusement_park");
+			list.add("aquarium");
+			list.add("art_gallery");
+			list.add("atm");
+			list.add("bakery");
+			list.add("bank");
+			list.add("bar");
+			list.add("beauty_salon");
+			list.add("bicycle_store");
+			list.add("book_store");
+			list.add("bowling_alley");
+			list.add("bus_station");
+			list.add("cafe");
+			list.add("campground");
+			list.add("car_dealer");
+			list.add("car_rental");
+			list.add("car_repair");
+			list.add("car_wash");
+			list.add("casino");
+			list.add("cemetery");
+			list.add("church");
+			list.add("city_hall");
+			list.add("clothing_store");
+			list.add("convenience_store");
+			list.add("courthouse");
+			list.add("dentist");
+			list.add("department_store");
+			list.add("doctor");
+			list.add("electrician");
+			list.add("electronics_store");
+			list.add("embassy");
+			list.add("establishment");
+			list.add("finance");
+			list.add("fire_station");
+			list.add("florist");
+			list.add("food");
+			list.add("funeral_home");
+			list.add("furniture_store");
+			list.add("gas_station");
+			list.add("general_contractor");
+			list.add("grocery_or_supermarket");
+			list.add("gym");
+			list.add("hair_care");
+			list.add("hardware_store");
+			list.add("health");
+			list.add("hindu_temple");
+			list.add("home_goods_store");
+			list.add("hospital");
+			list.add("insurance_agency");
+			list.add("jewelry_store");
+			list.add("laundry");
+			list.add("lawyer");
+			list.add("library");
+			list.add("liquor_store");
+			list.add("local_government_office");
+			list.add("locksmith");
+			list.add("lodging");
+			list.add("meal_delivery");
+			list.add("meal_takeaway");
+			list.add("mosque");
+			list.add("movie_rental");
+			list.add("movie_theater");
+			list.add("moving_company");
+			list.add("museum");
+			list.add("night_club");
+			list.add("painter");
+			list.add("park");
+			list.add("parking");
+			list.add("pet_store");
+			list.add("pharmacy");
+			list.add("physiotherapist");
+			list.add("place_of_worship");
+			list.add("plumber");
+			list.add("police");
+			list.add("post_office");
+			list.add("real_estate_agency");
+			list.add("restaurant");
+			list.add("roofing_contractor");
+			list.add("rv_park");
+			list.add("school");
+			list.add("shoe_store");
+			list.add("shopping_mall");
+			list.add("spa");
+			list.add("stadium");
+			list.add("storage");
+			list.add("store");
+			list.add("subway_station");
+			list.add("synagogue");
+			list.add("taxi_stand");
+			list.add("train_station");
+			list.add("travel_agency");
+			list.add("university");
+			list.add("veterinary_care");
+			list.add("zoo");
+		}
+		return list;
+	}
+}

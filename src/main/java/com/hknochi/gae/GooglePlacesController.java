@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.hknochi.gae.model.location.PlaceDetails;
 import com.hknochi.gae.model.location.PlacesSearchResponse;
 import com.hknochi.gae.service.GooglePlacesService;
@@ -41,7 +44,7 @@ public class GooglePlacesController {
 
 	@Autowired
 	private GooglePlacesService placesService;
-	
+
 	@Autowired
 	private RDFService rdfService;
 
@@ -63,6 +66,30 @@ public class GooglePlacesController {
 			@RequestParam(value = "sensor", required = false, defaultValue = "false") String sensor) {
 		return placesService.getPlacesNearby(location, radius, types, name,
 				sensor);
+	}
+
+	@RequestMapping(value = "/nearbysearch", method = RequestMethod.GET, produces = { "text/turtle" })
+	public @ResponseBody
+	String nearbysearchAsRDF(
+			@RequestParam(value = "location") String location,
+			@RequestParam(value = "radius", required = false, defaultValue = "1000") Long radius,
+			@RequestParam(value = "types", required = false, defaultValue = "") String types,
+			@RequestParam(value = "name", required = false, defaultValue = "") String name,
+			@RequestParam(value = "sensor", required = false, defaultValue = "false") String sensor)
+			throws IOException {
+		PlacesSearchResponse resp = placesService.getPlacesNearby(location,
+				radius, types, name, sensor);
+
+		if (resp.getNextPageToken() != null
+				&& !resp.getNextPageToken().isEmpty()) {
+			Queue queue = QueueFactory.getDefaultQueue();
+			queue.add(TaskOptions.Builder.withHeader("Accept", "text/turtle")
+					.method(TaskOptions.Method.GET)
+					.url("/geolocation/places/nearbysearch/next")
+					.param("token", resp.getNextPageToken()));
+		}
+		return rdfService.convert(resp, RDFTypes.TURTLE);
+
 	}
 
 	@RequestMapping(value = "/nearbysearchLatLng", method = RequestMethod.GET)
@@ -89,24 +116,70 @@ public class GooglePlacesController {
 		return placesService.getPlacesText(query, location, radius, types,
 				sensor);
 	}
-	
-	@RequestMapping(value = "/next", method = RequestMethod.GET)
+
+	@RequestMapping(value = "/textsearch/next", method = RequestMethod.GET)
 	public @ResponseBody
-	PlacesSearchResponse textsearch(
-			@RequestParam(value = "token") String token) {
+	PlacesSearchResponse textsearch(@RequestParam(value = "token") String token) {
 		return placesService.getNextPlaces(token);
 	}
 	
-	@RequestMapping(value = "/textsearch", method = RequestMethod.GET, produces={"text/turtle"})
+	@RequestMapping(value = "/nearbysearch/next", method = RequestMethod.GET)
+	public @ResponseBody
+	PlacesSearchResponse nearbysearch(@RequestParam(value = "token") String token) {
+		return placesService.getNextPlacesNearby(token);
+	}
+
+	@RequestMapping(value = "/textsearch/next", method = RequestMethod.GET, produces = { "text/turtle" })
+	public @ResponseBody
+	String textsearchAsRDF(@RequestParam(value = "token") String token)
+			throws IOException {
+		PlacesSearchResponse resp = placesService.getNextPlaces(token);
+		if (resp.getNextPageToken() != null
+				&& !resp.getNextPageToken().isEmpty() && !resp.getNextPageToken().equalsIgnoreCase(token) ) {
+			Queue queue = QueueFactory.getDefaultQueue();
+			queue.add(TaskOptions.Builder.withHeader("Accept", "text/turtle")
+					.method(TaskOptions.Method.GET)
+					.url("/geolocation/places/textsearch/next")
+					.param("token", resp.getNextPageToken()));
+		}
+		return rdfService.convert(resp, RDFTypes.TURTLE);
+	}
+	
+	@RequestMapping(value = "/nearbysearch/next", method = RequestMethod.GET, produces = { "text/turtle" })
+	public @ResponseBody
+	String nearbysearchAsRDF(@RequestParam(value = "token") String token)
+			throws IOException {
+		PlacesSearchResponse resp = placesService.getNextPlacesNearby(token);
+		if (resp.getNextPageToken() != null
+				&& !resp.getNextPageToken().isEmpty() && !resp.getNextPageToken().equalsIgnoreCase(token) ) {
+			Queue queue = QueueFactory.getDefaultQueue();
+			queue.add(TaskOptions.Builder.withHeader("Accept", "text/turtle")
+					.method(TaskOptions.Method.GET)
+					.url("/geolocation/places/nearbysearch/next")
+					.param("token", resp.getNextPageToken()));
+		}
+		return rdfService.convert(resp, RDFTypes.TURTLE);
+	}
+
+	@RequestMapping(value = "/textsearch", method = RequestMethod.GET, produces = { "text/turtle" })
 	public @ResponseBody
 	String textsearchAsRDF(
 			@RequestParam(value = "query") String query,
 			@RequestParam(value = "location", required = false, defaultValue = "") String location,
 			@RequestParam(value = "radius", required = false, defaultValue = "1000") Long radius,
 			@RequestParam(value = "types", required = false, defaultValue = "") String types,
-			@RequestParam(value = "sensor", required = false, defaultValue = "false") String sensor) throws IOException {
-		PlacesSearchResponse resp = placesService.getPlacesText(query, location, radius, types,
-				sensor);
+			@RequestParam(value = "sensor", required = false, defaultValue = "false") String sensor)
+			throws IOException {
+		PlacesSearchResponse resp = placesService.getPlacesText(query,
+				location, radius, types, sensor);
+		if (resp.getNextPageToken() != null
+				&& !resp.getNextPageToken().isEmpty()) {
+			Queue queue = QueueFactory.getDefaultQueue();
+			queue.add(TaskOptions.Builder.withHeader("Accept", "text/turtle")
+					.method(TaskOptions.Method.GET)
+					.url("/geolocation/places/textsearch/next")
+					.param("token", resp.getNextPageToken()));
+		}
 		return rdfService.convert(resp, RDFTypes.TURTLE);
 	}
 

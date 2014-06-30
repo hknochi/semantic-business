@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <cronentries>
 	<cron>
-		<url>
-			/heartbeat
-		</url>
+		<url>/heartbeat</url>
 		<description>Heartbeat</description>
 		<schedule>every 5 minutes</schedule>
 	</cron>

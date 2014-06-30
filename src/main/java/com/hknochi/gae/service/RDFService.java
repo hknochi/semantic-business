@@ -3,10 +3,10 @@ package com.hknochi.gae.service;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.appengine.api.datastore.Text;
-import com.google.appengine.api.memcache.MemcacheService;
 import com.hknochi.gae.model.location.PlaceGeometry;
 import com.hknochi.gae.model.location.PlacePhoto;
 import com.hknochi.gae.model.location.Places;
@@ -23,6 +22,7 @@ import com.hknochi.gae.model.rdf.AddressResource;
 import com.hknochi.gae.model.rdf.LocationResource;
 import com.hknochi.gae.model.rdf.PlacesResource;
 import com.hknochi.gae.model.rdf.RDFResource;
+import com.hknochi.gae.util.RDFRepository;
 import com.hknochi.gae.util.RDFTypes;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -52,10 +52,7 @@ public class RDFService {
 	private NominatimService geocoderService;
 
 	@Autowired
-	private MemcacheService memcacheService;
-
-	@PersistenceContext
-	private EntityManager entityManager;
+	private RDFRepository repo;
 
 	private static final int DEFAULT_EXPIRATION_TIME = 86400;
 
@@ -72,7 +69,7 @@ public class RDFService {
 	}
 
 	public RDFResource getResource(Class clazz, String resrouceId) {
-		return entityManager.find(clazz, resrouceId);
+		return repo.getEntityManager().find(clazz, resrouceId);
 	}
 
 	public PlacesResource convert(Places place, RDFTypes rdfType)
@@ -85,7 +82,8 @@ public class RDFService {
 		res.addProperty(RDF.type, model.createResource(SCHEMA + "Place"));
 		res.addProperty(RDFS.label, place.getName());
 		res.addProperty(model.createProperty(SCHEMA + "name"), place.getName());
-		res.addProperty(model.createProperty(SCHEMA + "geo"),
+		res.addProperty(
+				model.createProperty(SCHEMA + "geo"),
 				model.createResource(NS + "location/"
 						+ place.getGeometry().hashCode()));
 		for (PlacePhoto photo : place.getPhotos()) {
@@ -101,27 +99,29 @@ public class RDFService {
 
 		res.addProperty(model.createProperty(SCHEMA + "url"),
 				SERVICE + place.getReference());
-		
 
 		PlacesResource placesResource = new PlacesResource();
 		placesResource.setId(place.getId());
 		placesResource.setUri(res.getURI().toString());
 
-		
-
 		LocationResource locationResource = convert(place.getGeometry(),
 				rdfType);
-		res.addProperty(model.createProperty(SCHEMA + "address"),
-				model.createResource(NS + "address/" + getResource(AddressResource.class, locationResource.getAddressResourceId()).getId()));
-				
+		res.addProperty(
+				model.createProperty(SCHEMA + "address"),
+				model.createResource(NS
+						+ "address/"
+						+ getResource(AddressResource.class,
+								locationResource.getAddressResourceId())
+								.getId()));
+
 		out = new StringWriter();
 		model.write(out, rdfType.type());
 		model.close();
-		
+
 		placesResource.setRdfContent(new Text(out.toString()));
 		placesResource.setLocationResourceId(locationResource.getId());
 
-		entityManager.persist(placesResource);
+		repo.getEntityManager().persist(placesResource);
 		writer.append(out.toString());
 		return placesResource;
 	}
@@ -139,12 +139,12 @@ public class RDFService {
 				+ geometry.hashCode());
 		geoRes.addProperty(RDF.type,
 				model.createResource(SCHEMA + "GeoCoordinates"));
-		geoRes.addProperty(model.createProperty(SCHEMA + "latitude"),
-						geometry.getLocation().getLat());
-		geoRes.addProperty(model.createProperty(SCHEMA + "longitude"),
-						geometry.getLocation().getLng());
+		geoRes.addProperty(model.createProperty(SCHEMA + "latitude"), geometry
+				.getLocation().getLat());
+		geoRes.addProperty(model.createProperty(SCHEMA + "longitude"), geometry
+				.getLocation().getLng());
 		geoRes.addProperty(model.createProperty(SCHEMA + "sameAs"),
-						model.createResource(LGD + addr.getOsmType()+ addr.getOsmId()));
+				model.createResource(LGD + addr.getOsmType() + addr.getOsmId()));
 
 		StringWriter out = new StringWriter();
 		model.write(out, rdfType.type());
@@ -154,10 +154,10 @@ public class RDFService {
 		locationResource.setId("" + geometry.hashCode());
 		locationResource.setUri(geoRes.getURI().toString());
 		locationResource.setRdfContent(new Text(out.toString()));
-		
+
 		locationResource.setAddressResourceId(addrResource.getId());
 
-		entityManager.persist(locationResource);
+		repo.getEntityManager().persist(locationResource);
 		writer.append(out.toString());
 		return locationResource;
 	}
@@ -174,27 +174,32 @@ public class RDFService {
 		for (AddressElement element : address.getAddressElements()) {
 			switch (element.getKey()) {
 			case "country": {
-				addrRes.addProperty(model.createProperty(SCHEMA + "addressCountry"),
+				addrRes.addProperty(
+						model.createProperty(SCHEMA + "addressCountry"),
 						element.getValue());
 				break;
 			}
 			case "city": {
-				addrRes.addProperty(model.createProperty(SCHEMA + "addressLocality"),
+				addrRes.addProperty(
+						model.createProperty(SCHEMA + "addressLocality"),
 						element.getValue());
 				break;
 			}
 			case "state": {
-				addrRes.addProperty(model.createProperty(SCHEMA + "addressRegion"),
+				addrRes.addProperty(
+						model.createProperty(SCHEMA + "addressRegion"),
 						element.getValue());
 				break;
 			}
 			case "postcode": {
-				addrRes.addProperty(model.createProperty(SCHEMA + "postalCode"),
+				addrRes.addProperty(
+						model.createProperty(SCHEMA + "postalCode"),
 						element.getValue());
 				break;
 			}
 			case "road": {
-				addrRes.addProperty(model.createProperty(SCHEMA + "streetAddress"),
+				addrRes.addProperty(
+						model.createProperty(SCHEMA + "streetAddress"),
 						element.getValue());
 				break;
 			}
@@ -210,10 +215,16 @@ public class RDFService {
 		addressResource.setUri(addrRes.getURI().toString());
 		addressResource.setRdfContent(new Text(out.toString()));
 
-		entityManager.persist(addressResource);
+		repo.getEntityManager().persist(addressResource);
 		writer.append(out.toString());
 		return addressResource;
 
 	}
 
+	public Collection getAllResource(Class clazz) {
+		Query q = repo.getEntityManager().createQuery(
+				"Select a from "+clazz.getName()+" a",clazz );
+		return q.getResultList();
+
+	}
 }

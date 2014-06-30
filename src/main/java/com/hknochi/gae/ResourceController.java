@@ -1,5 +1,8 @@
 package com.hknochi.gae;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +36,18 @@ public class ResourceController {
 				.getRdfContent().getValue();
 	}
 
+	@RequestMapping(value = "/org/file", method = RequestMethod.GET)
+	public @ResponseBody
+	HttpEntity<byte[]> getAllPlacesAsFile() {
+		List<PlacesResource> results = new ArrayList<PlacesResource>(
+				rdfService.getAllResource(PlacesResource.class));
+		StringBuffer resp= new StringBuffer();
+		for (PlacesResource resSring : results) {
+			resp.append(resSring.getRdfContent().getValue());
+		}
+		return getResourceAsFile("PlacesResource", resp);
+	}
+
 	@RequestMapping(value = "/org/{id}/file", method = RequestMethod.GET)
 	public @ResponseBody
 	HttpEntity<byte[]> getPlacesResourceAsFile(
@@ -49,6 +64,18 @@ public class ResourceController {
 				.getRdfContent().getValue();
 	}
 
+	@RequestMapping(value = "/location/file", method = RequestMethod.GET)
+	public @ResponseBody
+	HttpEntity<byte[]> getAllLocationsAsFile() {
+		List<LocationResource> results = new ArrayList<LocationResource>(
+				rdfService.getAllResource(LocationResource.class));
+		StringBuffer resp= new StringBuffer();
+		for (LocationResource resSring : results) {
+			resp.append(resSring.getRdfContent().getValue());
+		}
+		return getResourceAsFile("PlacesResource", resp);
+	}
+	
 	@RequestMapping(value = "/location/{id}/file", method = RequestMethod.GET)
 	public @ResponseBody
 	HttpEntity<byte[]> getLocationResourceAsFile(
@@ -64,6 +91,19 @@ public class ResourceController {
 		return rdfService.getResource(AddressResource.class, resrouceId)
 				.getRdfContent().getValue();
 	}
+	
+	@RequestMapping(value = "/address/file", method = RequestMethod.GET)
+	public @ResponseBody
+	HttpEntity<byte[]> getAllAddressesAsFile() {
+		List<AddressResource> results = new ArrayList<AddressResource>(
+				rdfService.getAllResource(AddressResource.class));
+		StringBuffer resp= new StringBuffer();
+		for (AddressResource resSring : results) {
+			resp.append(resSring.getRdfContent().getValue());
+		}
+		return getResourceAsFile("PlacesResource", resp);
+	}
+	
 
 	@RequestMapping(value = "/address/{id}/file", method = RequestMethod.GET)
 	public @ResponseBody
@@ -75,14 +115,48 @@ public class ResourceController {
 	}
 
 	@RequestMapping(value = "/media/photo/{id}", method = RequestMethod.GET)
-	public String getPhoto(
-			@PathVariable(value = "id") String resrouceId) {
-		return "redirect: /geolocation/places/photo?photoreference="+resrouceId;
+	public String getPhoto(@PathVariable(value = "id") String resrouceId) {
+		return "redirect: /geolocation/places/photo?photoreference="
+				+ resrouceId;
+	}
+	
+	@RequestMapping(value = "/all/file", method = RequestMethod.GET)
+	public @ResponseBody
+	HttpEntity<byte[]> getAllResourcesAsFile() {
+		List<AddressResource> addressResource = new ArrayList<AddressResource>(
+				rdfService.getAllResource(AddressResource.class));
+		List<LocationResource> locationResource = new ArrayList<LocationResource>(
+				rdfService.getAllResource(LocationResource.class));
+		List<PlacesResource> placesResource = new ArrayList<PlacesResource>(
+				rdfService.getAllResource(PlacesResource.class));
+		StringBuffer resp= new StringBuffer();
+		for (AddressResource resSring : addressResource) {
+			resp.append(resSring.getRdfContent().getValue());
+		}
+		for (LocationResource resSring : locationResource) {
+			resp.append(resSring.getRdfContent().getValue());
+		}
+		for (PlacesResource resSring : placesResource) {
+			resp.append(resSring.getRdfContent().getValue());
+		}
+		return getResourceAsFile("all", resp);
 	}
 
 	private HttpEntity<byte[]> getResourceAsFile(String fileName,
 			RDFResource resource) {
 		byte[] documentBody = resource.getRdfContent().getValue().getBytes();
+		HttpHeaders header = new HttpHeaders();
+		header.setContentType(new MediaType("text", "turtle"));
+		header.set("Content-Disposition", "attachment; filename=" + fileName
+				+ ".txt");
+		header.setContentLength(documentBody.length);
+
+		return new HttpEntity<byte[]>(documentBody, header);
+	}
+
+	private HttpEntity<byte[]> getResourceAsFile(String fileName,
+			StringBuffer resource) {
+		byte[] documentBody = resource.toString().getBytes();
 		HttpHeaders header = new HttpHeaders();
 		header.setContentType(new MediaType("text", "turtle"));
 		header.set("Content-Disposition", "attachment; filename=" + fileName

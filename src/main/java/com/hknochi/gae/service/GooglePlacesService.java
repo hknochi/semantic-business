@@ -46,6 +46,9 @@ public class GooglePlacesService {
 
 	private static final String PLACE_TEXT_NEXT_PAGE_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?"
 			+ "pagetoken={token}&sensor=false&key={key}";
+	
+	private static final String PLACE_NEARBY_NEXT_PAGE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
+			+ "pagetoken={token}&sensor=false&key={key}";
 
 	private RestTemplate restTemplate;
 
@@ -104,6 +107,16 @@ public class GooglePlacesService {
 		try {
 			return nearBySearch(location, radius, types, name, sensor);
 		} catch (PlacesException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public PlacesSearchResponse getNextPlacesNearby(String token) {
+		try {
+			return nearbySearch(token);
+		} catch (PlacesException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -236,6 +249,31 @@ public class GooglePlacesService {
 		}
 
 		response = restTemplate.getForObject(PLACE_TEXT_NEXT_PAGE_URL,
+				PlacesSearchResponse.class, token,
+				googleApiKeyService.getGoogleApiKey());
+		logger.debug("external source with apikey:"
+				+ googleApiKeyService.getGoogleApiKey());
+
+		if (response.getResults() != null) {
+			memcacheService.put(getKey(token), response,
+					Expiration.byDeltaSeconds(DEFAULT_EXPIRATION_TIME));
+			return response;
+		} else {
+			throw new PlacesException("Unable to find next-page for token: "
+					+ token);
+		}
+	}
+	
+	private PlacesSearchResponse nearbySearch(String token)
+			throws PlacesException {
+		PlacesSearchResponse response = (PlacesSearchResponse) memcacheService
+				.get(getKey(token));
+		if (response != null) {
+			System.out.println("local source");
+			return response;
+		}
+
+		response = restTemplate.getForObject(PLACE_NEARBY_NEXT_PAGE_URL,
 				PlacesSearchResponse.class, token,
 				googleApiKeyService.getGoogleApiKey());
 		logger.debug("external source with apikey:"
